@@ -2,7 +2,7 @@ name: Smart Door
 on:
   pull_request:
   push:
-    branches: [main, feat/smart-door]
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,6 +23,7 @@ jobs:
       - run: python -m playwright install chromium
       - run: python -m ruff check .
       - run: node --check smartdoor/web/app.js
+      - run: ./scripts/start_demo.ps1 -Mode Check
       - run: python -m pytest -q --run-door-browser
   esp32s3:
     runs-on: ubuntu-latest

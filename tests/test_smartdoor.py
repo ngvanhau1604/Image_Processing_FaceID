@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 
 from smartdoor.evaluate import calibrate, fit, summarize
 from smartdoor.hardware import PIN_NAMES, board_pins, prepare_firmware, make_tls
-from smartdoor.protocol import ACK, VERIFY, Pending, Ticket
+from smartdoor.protocol import ACK, VERIFY, Pending, Ticket, mac
 from smartdoor.server import create_app
 from smartdoor.setup import provision
 from smartdoor.storage import data_directory, now_ms
@@ -164,6 +164,15 @@ def test_pending_bound_to_challenge_and_consumed(lab):
         Pending(ticket).consume(lab.keys[lab.device], expired)
 
 
+@pytest.mark.parametrize("duration", ["4999", "5000", "10000"])
+def test_ly03_accepts_only_the_fixed_two_second_command(lab, duration):
+    ticket = Ticket.new(lab.device, lab.boot)
+    fields = ("GRANTED", "manual", str(now_ms() + 1500), duration)
+    signature = mac(lab.keys[lab.device], "reply", *ticket.binding(), *fields)
+    with pytest.raises(ValueError, match="invalid decision"):
+        Pending(ticket).consume(lab.keys[lab.device], "\n".join((*fields, signature)))
+
+
 def test_hardware_requires_calibration_and_tls(lab, tmp_path):
     lab.device = "door-kit"
     person = lab.enroll()
@@ -240,6 +249,7 @@ def test_metrics():
     ]
     report = summarize(rows)
     assert report["by_scenario"]["authorized"]["correct_identity_grants"] == 1
+    assert report["by_scenario"]["authorized"]["correct_identity_grant_pct"] == 100
     assert report["latency_p95_ms"] == 120 and report["by_scenario"]["unknown"]["TIMEOUT"] == 1
 
 

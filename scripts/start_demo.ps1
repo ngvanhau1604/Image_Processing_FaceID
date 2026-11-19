@@ -25,7 +25,16 @@ if (-not (Test-Path -LiteralPath $stamp) -or (Get-Content -Raw -LiteralPath $sta
     Set-Content -LiteralPath $stamp -Value $expected
 }
 $env:PYTHONUTF8 = "1"
-& $python -c "from smartdoor.storage import data_directory; from smartdoor.vision import Vision; Vision(data_directory() / 'models').load()" 2>$null
+$probe = @'
+from smartdoor.storage import data_directory
+from smartdoor.vision import Vision
+import cv2
+try:
+    Vision(data_directory() / 'models').load()
+except (OSError, ValueError, cv2.error):
+    raise SystemExit(1)
+'@
+& $python -c $probe
 if ($LASTEXITCODE -ne 0) { Run-Python -m smartdoor.models }
 if ($Mode -eq "Check") {
     Run-Python -c "from smartdoor.server import app; from smartdoor.storage import data_directory; from smartdoor.vision import Vision; Vision(data_directory() / 'models').load(); print(app.title, 'OK', data_directory())"

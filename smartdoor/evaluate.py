@@ -132,6 +132,15 @@ def summarize(rows):
             pulses.append(width)
             if width >= 5000:
                 counts["ly03_pulse_limit_exceeded"] += 1
+    for scenario, counts in groups.items():
+        trials = counts["trials"]
+        for result in ("GRANTED", "DENIED", "ERROR", "TIMEOUT"):
+            counts[result.lower() + "_pct"] = round(100 * counts[result] / trials, 2)
+        if scenario == "authorized":
+            counts["correct_identity_grant_pct"] = round(100 * counts["correct_identity_grants"] / trials, 2)
+            counts["wrong_identity_grant_pct"] = round(
+                100 * (counts["GRANTED"] - counts["correct_identity_grants"]) / trials, 2
+            )
     return dict(
         trials=len(seen),
         by_scenario=groups,
