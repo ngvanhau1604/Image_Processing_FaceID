@@ -22,14 +22,18 @@ def main():
     parser.add_argument("--reload", action="store_true")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--cert", help="TLS certificate chain (PEM)")
+    parser.add_argument("--key", help="TLS private key (PEM)")
     args = parser.parse_args()
+    if bool(args.cert) != bool(args.key) or (args.host not in ("127.0.0.1", "localhost", "::1") and not args.cert):
+        parser.error("LAN requires --cert and --key")
     root = Path(__file__).resolve().parents[1]
     sys.path.insert(0, str(root))
     prepare_local_environment(root)
     import uvicorn
 
-    uvicorn.run("backend.app.main:app", host=args.host, port=args.port, reload=args.reload,
-                reload_dirs=[str(root)] if args.reload else None)
+    uvicorn.run("smartdoor.server:app", host=args.host, port=args.port, reload=args.reload,
+                reload_dirs=[str(root)] if args.reload else None, ssl_certfile=args.cert, ssl_keyfile=args.key, proxy_headers=False)
 
 
 if __name__ == "__main__":
