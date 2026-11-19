@@ -5,7 +5,9 @@ param(
 )
 $ErrorActionPreference = "Stop"
 Set-Location -LiteralPath (Split-Path -Parent $PSScriptRoot)
-$runtime = Join-Path $env:LOCALAPPDATA "FaceID-SmartDoorRuntime"
+# Store Python can redirect Local AppData. Ask the interpreter for its actual directory.
+$runtime = & py -3.11 -c "import os; from pathlib import Path; print((Path(os.environ['LOCALAPPDATA']) / 'FaceID-SmartDoorRuntime').resolve())"
+if ($LASTEXITCODE -ne 0 -or -not $runtime) { throw "Install Python 3.11 and its Windows launcher." }
 $python = Join-Path $runtime "venv/Scripts/python.exe"
 $stamp = Join-Path $runtime "requirements.sha256"
 
