@@ -1,15 +1,1 @@
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Run attendance web",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/scripts/run_web.py",
-      "python": "${workspaceFolder}/.venv313/Scripts/python.exe",
-      "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal",
-      "args": []
-    }
-  ]
-}
+{"version":"0.2.0","configurations":[{"name":"Smart Door","type":"debugpy","request":"launch","program":"${workspaceFolder}/scripts/run_web.py","cwd":"${workspaceFolder}","console":"integratedTerminal"}]}
