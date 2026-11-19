@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from . import admin, enrollment  # noqa: F401
+from . import access, admin, enrollment  # noqa: F401
 from .vision import Vision
 from .storage import ROOT, Store, data_directory
 
@@ -19,6 +19,7 @@ def create_app(folder=None):
 
     app = FastAPI(title="Smart Door", lifespan=lifespan)
     app.include_router(admin.router)
+    app.include_router(access.router)
     assets = ROOT / "smartdoor" / "web"
     app.mount("/assets", StaticFiles(directory=assets), name="assets")
 

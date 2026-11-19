@@ -1,1 +1,17 @@
-<!doctype html><html lang="vi"><meta charset="utf-8"><title>Smart Door</title><h1>Quản lý khóa cửa</h1><p>API quản trị tại <a href="/docs">/docs</a>.</p></html>
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Door · Quản lý khóa cửa</title><link rel="stylesheet" href="/assets/style.css"><script src="/assets/app.js" defer></script></head>
+<body><header><strong>Smart Door</strong><span>Kiểm soát ra vào</span><button id="logout" hidden>Đăng xuất</button></header>
+<main><form id="login" class="panel login"><h1>Đăng nhập quản trị</h1><label>Tài khoản<input id="username" required autocomplete="username" value="admin"></label>
+<label>Mật khẩu<input type="password" id="password" required autocomplete="current-password"></label><button>Đăng nhập</button></form>
+<p id="message" role="status" aria-live="polite"></p>
+<div id="workspace" hidden><div class="bar"><label>Thiết bị đang quản lý<select id="device"></select></label><span id="connection"></span></div>
+<nav aria-label="Quản trị"><button data-page="users">Người dùng và quyền</button><button data-page="faces">Đăng ký khuôn mặt</button><button data-page="hardware">Thiết bị</button><button data-page="history">Lịch sử truy cập</button></nav>
+<section id="users" class="panel"><h1>Người dùng và quyền</h1><form id="personForm"><label>Mã người dùng<input id="code" required maxlength="40" pattern="[A-Za-z0-9_-]+"></label>
+<label>Họ tên<input id="name" required maxlength="100"></label><label class="check"><input type="checkbox" id="consent"> Đã đồng ý thu mẫu khuôn mặt</label>
+<button id="save">Thêm người dùng</button><button id="cancelEdit" type="button" hidden>Hủy sửa</button></form><div class="scroll"><table><thead><tr><th>Người dùng</th><th>Đồng ý</th><th>Số mẫu</th><th>Quyền tại thiết bị</th><th>Thao tác</th></tr></thead><tbody id="people"></tbody></table></div></section>
+<section id="faces" class="panel" hidden><h1>Đăng ký khuôn mặt</h1><p>Đứng trước camera của thiết bị đã chọn. Nhìn thẳng rồi nghiêng nhẹ sang hai bên. Relay giữ tắt trong khi thu mẫu.</p>
+<form id="enrollForm"><label>Người tham gia<select id="subject" required></select></label><label>Số mẫu<input id="count" type="number" value="5" min="5" max="10" required></label>
+<button>Bắt đầu thu mẫu</button><button id="cancelSession" type="button">Hủy phiên thu</button></form><p id="progress" role="status"></p><p id="feedback"></p></section>
+<section id="hardware" class="panel" hidden><h1>Thiết bị</h1><p id="hardwareState"></p><p id="calibration"></p><button id="manual">Mở thử trong 2 giây</button></section>
+<section id="history" class="panel" hidden><h1>Lịch sử truy cập</h1><div class="scroll"><table><thead><tr><th>Thời gian</th><th>Thiết bị</th><th>Người dùng</th><th>Quyết định</th><th>Lý do</th><th>Relay</th></tr></thead><tbody id="events"></tbody></table></div></section></div></main></body></html>
