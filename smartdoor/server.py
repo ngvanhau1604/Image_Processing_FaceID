@@ -2,7 +2,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from . import admin
+from . import admin, enrollment  # noqa: F401
+from .vision import Vision
 from .storage import ROOT, Store, data_directory
 
 
@@ -10,6 +11,7 @@ def create_app(folder=None):
     @asynccontextmanager
     async def lifespan(app):
         app.state.store = Store(folder or data_directory())
+        app.state.vision = Vision(app.state.store.folder / 'models')
         try:
             yield
         finally:

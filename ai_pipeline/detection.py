@@ -60,7 +60,7 @@ class HybridFaceDetector:
                 "error": self.error, "rescued_frames": self.rescued_frames,
                 "lighting_rescues": self.lighting_rescues, "extra_face_frames": self.extra_face_frames}
 
-    def _boxes(self, frame):
+    def landmark_rows(self, frame):
         height, width = frame.shape[:2]
         scale = min(1.0, self.options.max_side / max(height, width))
         work = cv2.resize(frame, (max(1, round(width * scale)), max(1, round(height * scale))),
@@ -68,17 +68,28 @@ class HybridFaceDetector:
         wh, ww = work.shape[:2]
         self._detector.setInputSize((ww, wh))
         _count, faces = self._detector.detect(np.ascontiguousarray(work))
-        boxes = []
+        rows = []
         for row in faces if faces is not None else ():
             if len(row) != 15 or not np.isfinite(row).all() or row[14] < self.options.score_threshold:
                 continue
             x, y, w, h = (float(value) for value in row[:4])
             if w <= 0 or h <= 0:
                 continue
+            mapped = np.asarray(row, dtype=np.float32).copy()
+            mapped[:14:2] *= width / ww
+            mapped[1:14:2] *= height / wh
+            rows.append(mapped)
+        return rows
+
+    def _boxes(self, frame):
+        height, width = frame.shape[:2]
+        boxes = []
+        for row in self.landmark_rows(frame):
+            x, y, w, h = (float(value) for value in row[:4])
             # Box DNN dùng tọa độ liên tục; map cả biên phải/dưới trước khi làm tròn.
-            left, top = max(0, int(np.floor(x * width / ww))), max(0, int(np.floor(y * height / wh)))
-            right = min(width, int(np.ceil((x + w) * width / ww)))
-            bottom = min(height, int(np.ceil((y + h) * height / wh)))
+            left, top = max(0, int(np.floor(x))), max(0, int(np.floor(y)))
+            right = min(width, int(np.ceil(x + w)))
+            bottom = min(height, int(np.ceil(y + h)))
             if right > left and bottom > top:
                 boxes.append((left, top, right - left, bottom - top))
         return boxes
