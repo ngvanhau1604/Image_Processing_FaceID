@@ -93,7 +93,7 @@ bool post(const char* path, const Ticket& t, uint8_t* data, size_t len, String& 
   return ok;
 }
 
-bool grantValid(const String& reply, const Ticket& t, uint32_t started) {
+bool verifyReply(const String& reply, const Ticket& t, uint32_t started, String& decision, String& reason) {
   String fields[5];
   int pos=0;
   for (int i=0;i<4;++i) {
@@ -102,11 +102,15 @@ bool grantValid(const String& reply, const Ticket& t, uint32_t started) {
     fields[i]=reply.substring(pos,sep); pos=sep+1;
   }
   fields[4]=reply.substring(pos);
-  if (fields[0]!="GRANTED" || fields[3]!="2000" || fields[2].length()!=13) return false;
+  bool grant = fields[0]=="GRANTED";
+  if (!grant && fields[0]!="DENIED" && fields[0]!="ERROR") return false;
+  if (fields[3]!=(grant ? "2000" : "0") || fields[2].length()!=13) return false;
   for (char c : fields[2]) if (c<'0'||c>'9') return false;
   int64_t expires=strtoll(fields[2].c_str(),nullptr,10);
   String expected=signText("reply\n"+t.binding+"\n"+reply.substring(0,pos-1));
-  return sameSignature(fields[4],expected) && utcMs()<=expires && expires<=t.sent+6500 && millis()-started<=6500;
+  if (!sameSignature(fields[4],expected) || utcMs()>expires || expires>t.sent+6500 || millis()-started>6500) return false;
+  decision=fields[0]; reason=fields[1];
+  return true;
 }
 
 void turnOff(void*) {
@@ -187,8 +191,9 @@ void loop() {
   String reply;
   bool ok=frame->format==PIXFORMAT_JPEG && post(VERIFY,pending,frame->buf,frame->len,reply);
   esp_camera_fb_return(frame);
-  bool grant=ok && grantValid(reply,pending,started);
-  Serial.printf("request=%s response=%s latency_ms=%lu\n",pending.request.c_str(),ok?"received":"unavailable",(unsigned long)(millis()-started));
-  if (grant) pulse(pending.request);
+  String decision="ERROR", reason="transport_or_invalid_reply";
+  bool verified=ok && verifyReply(reply,pending,started,decision,reason);
+  Serial.printf("request=%s decision=%s reason=%s latency_ms=%lu\n",pending.request.c_str(),decision.c_str(),reason.c_str(),(unsigned long)(millis()-started));
+  if (verified && decision=="GRANTED") pulse(pending.request);
   delay(600);
 }

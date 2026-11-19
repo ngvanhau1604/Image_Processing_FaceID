@@ -29,7 +29,7 @@ def main():
         parser.error("LAN requires --cert and --key")
     root = Path(__file__).resolve().parents[1]
     sys.path.insert(0, str(root))
-    prepare_local_environment(root)
+    os.chdir(root)
     import uvicorn
 
     uvicorn.run("smartdoor.server:app", host=args.host, port=args.port, reload=args.reload,

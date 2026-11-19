@@ -19,7 +19,8 @@ Thay IP, SSID và máy NTP bằng cấu hình LAN thực. Lệnh prepare hỏi m
 
 Trên Windows PowerShell:
 
-    $tls = Join-Path $env:LOCALAPPDATA 'FaceID-SmartDoor/tls'
+    $data = python -c "from smartdoor.storage import data_directory; print(data_directory())"
+    $tls = Join-Path $data 'tls'
     python scripts/run_web.py --host 0.0.0.0 --port 8443 --cert "$tls/server.pem" --key "$tls/server.key"
 
 Mở cổng server cho mạng LAN thử nghiệm. ESP32 xác minh CA và hostname/IP. Thiếu đồng hồ, lỗi TLS, sai mã cảm biến, mất camera hoặc mất backend đều không tạo xung mở.

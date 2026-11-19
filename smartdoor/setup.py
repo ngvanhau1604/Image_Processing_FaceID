@@ -1,4 +1,5 @@
 """Provision local credentials. Never print a device key."""
+
 import argparse
 import getpass
 import json
@@ -15,13 +16,18 @@ def provision(store, username, password):
         if not db.execute("SELECT 1 FROM accounts WHERE username=?", (username,)).fetchone():
             db.execute("INSERT INTO accounts VALUES(?,?)", (username, hash_password(password)))
         for device, simulated in (("webcam-demo", 1), ("door-kit", 0)):
-            db.execute("INSERT OR IGNORE INTO devices(id,simulated,secret) VALUES(?,?,?)", (device, simulated, secrets.token_hex(32)))
+            db.execute(
+                "INSERT OR IGNORE INTO devices(id,simulated,secret) VALUES(?,?,?)",
+                (device, simulated, secrets.token_hex(32)),
+            )
         audit(db, username, "setup", "local")
     # Export only the simulator key here. The hardware provisioning step is separate.
     with store.transaction(False) as db:
         key = db.execute("SELECT secret FROM devices WHERE id='webcam-demo'").fetchone()[0]
     path = store.folder / "simulator.json"
-    with os.fdopen(os.open(path, os.O_CREAT | os.O_WRONLY | os.O_TRUNC, 0o600), "w", encoding="utf8") as output:
+    with os.fdopen(
+        os.open(path, os.O_CREAT | os.O_WRONLY | os.O_TRUNC, 0o600), "w", encoding="utf8"
+    ) as output:
         json.dump({"device": "webcam-demo", "secret": key}, output)
     return path
 

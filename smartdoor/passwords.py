@@ -1,4 +1,5 @@
 """PBKDF2 format shared with AttendAI's password verifier."""
+
 import hashlib
 import hmac
 import secrets
