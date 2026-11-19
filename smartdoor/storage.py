@@ -1,4 +1,5 @@
 """Local state for one door. All business mutations use a single SQLite transaction."""
+
 import os
 import sqlite3
 from contextlib import contextmanager
@@ -12,9 +13,17 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def data_directory():
     default = Path(os.getenv("LOCALAPPDATA") or Path.home() / ".local" / "share") / "FaceID-SmartDoor"
-    folder = Path(os.getenv("SMARTDOOR_HOME") or default).expanduser().resolve()
-    forbidden = [ROOT, *(Path(v).resolve() for k, v in os.environ.items() if k.lower().startswith("onedrive") and v)]
-    if any(folder.is_relative_to(base) for base in forbidden) or any(p.lower().startswith("onedrive") for p in folder.parts):
+    from dotenv import dotenv_values
+
+    override = os.getenv("SMARTDOOR_HOME") or dotenv_values(ROOT / ".env").get("SMARTDOOR_HOME")
+    folder = Path(override or default).expanduser().resolve()
+    forbidden = [
+        ROOT,
+        *(Path(v).resolve() for k, v in os.environ.items() if k.lower().startswith("onedrive") and v),
+    ]
+    if any(folder.is_relative_to(base) for base in forbidden) or any(
+        p.lower().startswith("onedrive") for p in folder.parts
+    ):
         raise ValueError("SMARTDOOR_HOME must be outside Git and OneDrive")
     folder.mkdir(mode=0o700, parents=True, exist_ok=True)
     return folder
@@ -48,7 +57,9 @@ CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY, time INTEGER NOT NULL,
 class Store:
     def __init__(self, folder):
         self.folder = Path(folder)
-        self.engine = create_engine(URL.create("sqlite", database=str(self.folder / "smartdoor.db")), poolclass=NullPool)
+        self.engine = create_engine(
+            URL.create("sqlite", database=str(self.folder / "smartdoor.db")), poolclass=NullPool
+        )
 
         @event.listens_for(self.engine, "connect")
         def setup(connection, _):
@@ -61,6 +72,10 @@ class Store:
             for statement in SCHEMA.split(";"):
                 if statement.strip():
                     db.execute(statement)
+            columns = {r[1] for r in db.execute("PRAGMA table_info(events)")}
+            for column, kind in (("candidate", "INTEGER"), ("profile", "TEXT")):
+                if column not in columns:
+                    db.execute(f"ALTER TABLE events ADD COLUMN {column} {kind}")
 
     @contextmanager
     def transaction(self, write=True):
@@ -79,8 +94,12 @@ class Store:
 
 def now_ms():
     from time import time_ns
+
     return time_ns() // 1_000_000
 
 
 def audit(db, actor, action, subject):
-    db.execute("INSERT INTO audit(time,actor,action,subject) VALUES(?,?,?,?)", (now_ms(), actor, action, str(subject)))
+    db.execute(
+        "INSERT INTO audit(time,actor,action,subject) VALUES(?,?,?,?)",
+        (now_ms(), actor, action, str(subject)),
+    )

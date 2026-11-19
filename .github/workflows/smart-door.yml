@@ -1,0 +1,46 @@
+name: Smart Door
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows-demo:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: python -m pip install -r requirements-browser.txt
+      - run: python -m smartdoor.models
+      - run: python -m playwright install chromium
+      - run: python -m ruff check .
+      - run: node --check smartdoor/web/app.js
+      - run: ./scripts/start_demo.ps1 -Mode Check
+      - run: python -m pytest -q --run-door-browser
+  esp32s3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/setup-arduino-cli@v2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install "SQLAlchemy>=2,<3" "cryptography>=44,<50"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.arduino15
+          key: arduino-esp32-3.3.7-linux-v1
+      - run: |
+          arduino-cli core update-index --additional-urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          arduino-cli core install esp32:esp32@3.3.7 --additional-urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+      - run: arduino-cli compile --fqbn esp32:esp32:esp32s3:FlashSize=16M,PSRAM=opi firmware/smart_door
+      - run: python -m scripts.check_firmware_build

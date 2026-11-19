@@ -1,4 +1,5 @@
 """One YuNet detection and one aligned SFace descriptor on the original frame."""
+
 from dataclasses import dataclass
 from hashlib import sha256
 from io import BytesIO
@@ -32,11 +33,15 @@ class Vision:
         self.recognizer = None
 
     def load(self):
-        detector = HybridFaceDetector(FaceDetectionOptions(backend="yunet", model_path=self.directory / YUNET_FILENAME))
+        detector = HybridFaceDetector(
+            FaceDetectionOptions(backend="yunet", model_path=self.directory / YUNET_FILENAME)
+        )
         path = self.directory / SFACE_FILENAME
         if not detector.status()["yunet_ready"] or sha256(path.read_bytes()).hexdigest() != SFACE_SHA256:
             raise ValueError("unverified models")
-        self.recognizer = cv2.FaceRecognizerSF.create(str(path), "", cv2.dnn.DNN_BACKEND_OPENCV, cv2.dnn.DNN_TARGET_CPU)
+        self.recognizer = cv2.FaceRecognizerSF.create(
+            str(path), "", cv2.dnn.DNN_BACKEND_OPENCV, cv2.dnn.DNN_TARGET_CPU
+        )
         self.detector = detector
 
     def observe(self, jpeg):
@@ -44,7 +49,9 @@ class Vision:
             with Image.open(BytesIO(jpeg)) as header:
                 if header.format != "JPEG" or max(header.size) > 2048 or min(header.size) < 32:
                     return Observation("invalid_jpeg")
-            frame = cv2.imdecode(np.frombuffer(jpeg, dtype=np.uint8), cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION)
+            frame = cv2.imdecode(
+                np.frombuffer(jpeg, dtype=np.uint8), cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION
+            )
             if frame is None:
                 return Observation("invalid_jpeg")
         except (ValueError, OSError, UnidentifiedImageError, Image.DecompressionBombError, cv2.error):
@@ -58,11 +65,15 @@ class Vision:
                     return Observation("no_face" if len(faces) == 0 else "multiple_faces")
                 row = faces[0]
                 x, y, w, h = row[:4]
-                crop = frame[max(0, int(y)):max(0, int(np.ceil(y+h))), max(0, int(x)):max(0, int(np.ceil(x+w)))]
+                crop = frame[
+                    max(0, int(y)) : max(0, int(np.ceil(y + h))), max(0, int(x)) : max(0, int(np.ceil(x + w)))
+                ]
                 quality = assess_face_quality_v2(crop)
                 if not quality.accepted:
                     reason = (quality.reason or "").lower()
-                    label = next((s for s in ("small", "dark", "overexposed", "blurry") if s in reason), "low_detail")
+                    label = next(
+                        (s for s in ("small", "dark", "overexposed", "blurry") if s in reason), "low_detail"
+                    )
                     return Observation(label)
                 aligned = self.recognizer.alignCrop(frame, row)
                 vector = self.recognizer.feature(aligned).ravel().astype("<f4")
@@ -75,8 +86,11 @@ class Vision:
 
 def identify(db, vector, threshold, margin):
     gallery = {}
-    for row in db.execute("""SELECT t.person,t.vector FROM templates t JOIN people p ON t.person=p.id
-                             WHERE p.consent=1 AND t.profile=?""", (PROFILE,)):
+    for row in db.execute(
+        """SELECT t.person,t.vector FROM templates t JOIN people p ON t.person=p.id
+                             WHERE p.consent=1 AND t.profile=?""",
+        (PROFILE,),
+    ):
         gallery.setdefault(row[0], []).append(np.frombuffer(row[1], dtype="<f4"))
     compiled = CompiledGallery(gallery, 128, metric="cosine")
     return compiled.match_many([np.frombuffer(vector, dtype="<f4")], threshold=threshold, margin=margin)[0]

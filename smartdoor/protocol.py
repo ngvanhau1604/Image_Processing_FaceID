@@ -1,4 +1,5 @@
 """Smart Door v1: UTF-8 lines, no final newline; key material is decoded hex."""
+
 import hashlib
 import hmac
 import re
@@ -40,7 +41,9 @@ class Ticket:
         return mac(key, "v1", path, *self.binding(), hashlib.sha256(body).hexdigest())
 
     def headers(self, key, path, body):
-        headers = dict(zip(("X-Device","X-Boot","X-Request","X-Nonce","X-Sent"), map(str, self.binding())))
+        headers = dict(
+            zip(("X-Device", "X-Boot", "X-Request", "X-Nonce", "X-Sent"), map(str, self.binding()))
+        )
         headers["X-Signature"] = self.signature(key, path, body)
         return headers
 
@@ -61,14 +64,19 @@ class Pending:
             raise ValueError("request already consumed")
         self.used = True
         parts = response.split("\n")
-        if len(parts) != 5:
+        if len(parts) != 5 or not response.isascii():
             raise ValueError("invalid reply")
         decision, reason, expires, duration, signature = parts
         expected = mac(key, "reply", *self.ticket.binding(), *parts[:4])
         if not hmac.compare_digest(signature, expected):
             raise ValueError("invalid reply signature")
-        if not now_ms() <= int(expires) <= self.ticket.sent + WINDOW or (monotonic()-self.started)*1000 > WINDOW:
+        if (
+            not now_ms() <= int(expires) <= self.ticket.sent + WINDOW
+            or (monotonic() - self.started) * 1000 > WINDOW
+        ):
             raise ValueError("expired reply")
-        if decision not in ("GRANTED","DENIED","ERROR") or duration != str(PULSE if decision == "GRANTED" else 0):
+        if decision not in ("GRANTED", "DENIED", "ERROR") or duration != str(
+            PULSE if decision == "GRANTED" else 0
+        ):
             raise ValueError("invalid decision")
         return decision, reason

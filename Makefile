@@ -1,16 +1,19 @@
-.PHONY: test test-browser lint run seed
+.PHONY: test lint run setup models simulator
 
 test:
 	python -m pytest -q
-
-test-browser:
-	python -m pytest -q tests/test_web_ui.py --run-browser
 
 lint:
 	python -m ruff check .
 
 run:
-	python scripts/run_web.py --reload
+	python scripts/run_web.py
 
-seed:
-	python scripts/seed_demo.py
+setup:
+	python -m smartdoor.setup
+
+models:
+	python -m smartdoor.models
+
+simulator:
+	python -m smartdoor.simulator

@@ -11,7 +11,7 @@ def create_app(folder=None):
     @asynccontextmanager
     async def lifespan(app):
         app.state.store = Store(folder or data_directory())
-        app.state.vision = Vision(app.state.store.folder / 'models')
+        app.state.vision = Vision(app.state.store.folder / "models")
         try:
             yield
         finally:
@@ -26,6 +26,7 @@ def create_app(folder=None):
     @app.get("/", include_in_schema=False)
     def home():
         return FileResponse(assets / "index.html", headers={"Cache-Control": "no-store"})
+
     return app
 
 
