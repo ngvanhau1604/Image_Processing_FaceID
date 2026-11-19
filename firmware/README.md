@@ -1,6 +1,6 @@
 # ESP32-S3 N16R8 CAM Kit · wmx88.vn · OV3660
 
-Mục tiêu là bo N16R8 của wmx88.vn, camera OV3660, relay giao tiếp 3,3 V và chốt LY-01 12 V. Sơ đồ chân DVP trong mô tả bán hàng còn thiếu D0–D7 và PCLK theo từng GPIO. Mẫu JSON để trống các chân cần đối chiếu. Dùng sơ đồ của đúng phiên bản PCB hoặc đo thông mạch khi đã ngắt nguồn. Ghi nguồn đối chiếu vào pinout_source. Điền -1 cho PWDN/RESET chỉ khi xác nhận chúng không nối GPIO. Ghi cấu hình thực vào một bản sao ngoài Git. Không dùng pin map MB0184 chỉ vì cùng N16R8.
+Mục tiêu là bo N16R8 của wmx88.vn, camera OV3660, relay giao tiếp 3,3 V và chốt LY-03 12 V. Sơ đồ chân DVP trong mô tả bán hàng còn thiếu D0–D7 và PCLK theo từng GPIO. Mẫu JSON để trống các chân cần đối chiếu. Dùng sơ đồ của đúng phiên bản PCB hoặc đo thông mạch khi đã ngắt nguồn. Ghi nguồn đối chiếu vào pinout_source. Điền -1 cho PWDN/RESET chỉ khi xác nhận chúng không nối GPIO. Ghi cấu hình thực vào một bản sao ngoài Git. Không dùng pin map MB0184 chỉ vì cùng N16R8.
 
 ### Biên dịch
 
@@ -28,7 +28,7 @@ Mở cổng server cho mạng LAN thử nghiệm. ESP32 xác minh CA và hostnam
 
 1. Giữ nhánh khóa 12 V ngắt nguồn. Nạp cấu hình chỉ-camera. Đọc Serial 115200 để xác nhận OV3660, thử ảnh JPEG và trạng thái thiết bị trên UI.
 2. Xác nhận GPIO riêng, mức kích, khả năng nhận 3,3 V và điện trở kéo bảo đảm relay ngắt từ lúc cấp nguồn đến khi firmware chạy. Kiểm tra lúc reset, mất mạng và mất nguồn bằng tải chỉ thị. Sau khi xác nhận, thêm --enable-verified-relay khi tạo cấu hình và nạp lại.
-3. Board nhận 5 V từ USB. Dùng nhánh 12 V riêng cho relay/LY-01, tiếp điểm thường hở, cầu chì và diode dập xung đúng cực trên cuộn khóa. Kiểm tra định mức DC theo đúng linh kiện nhận được. Thử xung 2 giây và đo ở tải. Bộ hẹn giờ trên ESP32 ngắt GPIO độc lập với yêu cầu mạng.
+3. Board nhận 5 V từ USB. Dùng nhánh 12 V riêng cho relay/LY-03, tiếp điểm thường hở, cầu chì và diode dập xung đúng cực trên cuộn khóa. Kiểm tra định mức DC theo đúng linh kiện nhận được. Theo mô tả LY-03 của Linhkien24hShop, khóa thường đóng dùng 12 V DC, 350 mA (4,2 W), nguồn yêu cầu 12 V/1 A và mỗi lần cấp điện phải dưới 5 giây. Cả mở tự động và mở thử dùng xung cố định 2 giây. Đo riêng độ dài xung ở tải, kiểm tra cực tính theo linh kiện thực. Nhà bán chưa công bố chu kỳ nghỉ cho phép, nên xác nhận trước bài thử lặp 30 chu trình. Bộ hẹn giờ trên ESP32 ngắt GPIO độc lập với yêu cầu mạng.
 4. Hiệu chỉnh ngưỡng theo camera trước khi nghiệm thu mở tự động. Lưu log thời gian, phản hồi GPIO và quan sát chốt như các bằng chứng riêng.
 
 [Driver camera Espressif](https://github.com/espressif/esp32-camera) · [Giới hạn GPIO ESP32-S3](https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-reference/peripherals/gpio.html)

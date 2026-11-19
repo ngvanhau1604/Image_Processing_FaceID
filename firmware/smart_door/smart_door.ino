@@ -17,7 +17,8 @@
 struct Ticket { String request, nonce, binding; int64_t sent; };
 const char* VERIFY = "/api/v1/access/verify";
 const char* ACK = "/api/v1/access/ack";
-const int PULSE_MS = 2000;
+constexpr int PULSE_MS = 2000;
+static_assert(PULSE_MS > 0 && PULSE_MS < 5000, "LY-03 requires pulses shorter than five seconds");
 String bootId;
 uint8_t keyBytes[32];
 esp_timer_handle_t cutOff = nullptr;
