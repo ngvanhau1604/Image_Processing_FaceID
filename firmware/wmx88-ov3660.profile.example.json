@@ -1,0 +1,11 @@
+{
+  "sensor": "OV3660",
+  "pinout_source": null,
+  "camera": {
+    "d0": null, "d1": null, "d2": null, "d3": null,
+    "d4": null, "d5": null, "d6": null, "d7": null,
+    "xclk": null, "pclk": null, "vsync": null, "href": null,
+    "sda": null, "scl": null, "pwdn": null, "reset": null
+  },
+  "relay": {"gpio": null, "active_high": null}
+}
