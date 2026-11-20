@@ -1,0 +1,48 @@
+name: IoT door demo Python validation
+
+on:
+  pull_request:
+    paths:
+      - "iot_door/**"
+      - "firmware/esp32_s3_cam/**"
+      - "backend/app/iot_door.py"
+      - "backend/app/main.py"
+      - "backend/app/config.py"
+      - "backend/app/models.py"
+      - "tests/test_iot_door*.py"
+      - ".github/workflows/iot-door-tests.yml"
+
+jobs:
+  protocol-and-api-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt "httpx>=0.28,<1"
+      - name: Compile Python modules
+        run: python -m compileall -q iot_door backend/app/iot_door.py tests/test_iot_door.py tests/test_iot_door_api.py
+      - name: Run mocked IoT API and protocol tests
+        run: python -m pytest -q tests/test_iot_door.py tests/test_iot_door_api.py
+
+  firmware-compile-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install PlatformIO
+        run: python -m pip install platformio
+      - name: Configure throwaway compile-only headers
+        run: |
+          cp firmware/esp32_s3_cam/include/secrets.example.h firmware/esp32_s3_cam/include/secrets.h
+          cp firmware/esp32_s3_cam/include/hardware_config.example.h firmware/esp32_s3_cam/include/hardware_config.h
+          # TEST-ONLY dummy pin to compile the sketch; NOT a wiring recommendation.
+          sed -i 's/#define IOT_RELAY_GPIO -1/#define IOT_RELAY_GPIO 1/' firmware/esp32_s3_cam/include/hardware_config.h
+      - name: Compile firmware (no board, no electrical validation)
+        run: pio run --project-dir firmware/esp32_s3_cam

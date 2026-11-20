@@ -7,3 +7,7 @@ __pycache__/
 .env
 attendance.db
 storage/
+
+firmware/esp32_s3_cam/include/secrets.h
+firmware/esp32_s3_cam/include/hardware_config.h
+firmware/esp32_s3_cam/.pio/
