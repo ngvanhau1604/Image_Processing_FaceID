@@ -4,6 +4,7 @@
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <esp_camera.h>
+#include <esp_system.h>
 #include <mbedtls/md.h>
 #include <time.h>
 

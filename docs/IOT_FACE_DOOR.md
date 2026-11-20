@@ -34,7 +34,7 @@ gửi JPEG; ảnh không được lưu bởi endpoint cửa.
 | Chỉ cho ID trong allowlist, đủ 5 góc, đồng ý và khớp model | IMPLEMENTED |
 | Xác nhận ít nhất 3 khung khác nhau trong 8 giây, cooldown 5 giây | IMPLEMENTED |
 | Phản hồi JSON ký HMAC; log quyết định trước lệnh mở | IMPLEMENTED |
-| Unit tests logic protocol | TEST CODE ADDED, chưa có kết quả chạy |
+| Unit tests protocol và mocked API, GitHub Actions | TEST CODE ADDED, cần kiểm chứng CI |
 | Firmware mẫu ESP32-S3/OV3660 + HMAC/TLS (chưa build/flash) | SOURCE ADDED, NOT TESTED |
 | GPIO relay / wiring / dòng khóa / bench test | PENDING |
 | Liveness/PAD, audit trong nhiều worker, vận hành production | NOT IMPLEMENTED |
