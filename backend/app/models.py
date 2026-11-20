@@ -234,3 +234,15 @@ class AuditLog(Base):
     before_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     after_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+
+class DoorAccessEvent(Base):
+    """Metadata only; no JPEG saved by the IoT endpoint."""
+    __tablename__ = "door_access_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    device_id: Mapped[str] = mapped_column(String(100), index=True)
+    subject_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    decision: Mapped[str] = mapped_column(String(20), index=True)
+    reason: Mapped[str] = mapped_column(String(80))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)

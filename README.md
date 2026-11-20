@@ -1,4 +1,17 @@
-# AttendAI — điểm danh bằng khuôn mặt
+# FaceID: Điểm danh kế thừa + Khóa cửa IoT bằng khuôn mặt (demo)
+
+**Mục tiêu hiện tại:** Keyestudio MB0184 ESP32-S3-CAM N16R8 / OV3660 truyền
+JPEG qua Wi-Fi tới laptop chạy Face ID + FastAPI, nhận lệnh mở có chữ ký
+để kích relay/driver của khóa **LY-03 12 V/0,35 A**. Nguồn khóa hiện có
+**12 V/1 A**. Relay, wiring, GPIO và dòng thực tế **chưa được xác minh**.
+
+Mô-đun IoT **mặc định tắt**, chưa có liveness/PAD và chưa chạy thử trên thiết
+bị thật; không dùng bảo vệ cửa thật. Xem [mô tả đồ án IoT và tiến độ](docs/IOT_FACE_DOOR.md).
+Phần AttendAI dưới đây vẫn được giữ nguyên, không tự cấp quyền mở khóa.
+
+---
+
+## AttendAI (phân hệ kế thừa)
 
 Bản demo học thuật chạy local: quản lý sinh viên/lớp/buổi học, đăng ký khuôn mặt
 năm góc, nhận diện nhiều người liên tục qua camera, điều chỉnh điểm danh và xuất

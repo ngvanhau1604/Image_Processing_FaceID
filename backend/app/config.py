@@ -11,6 +11,13 @@ class Settings(BaseSettings):
     storage_dir: Path = Path("./storage")
     camera_api_token: str = "change-me-camera-token"
     auth_session_hours: int = Field(default=8, ge=1, le=72)
+    # Experimental door module; never grant access by default.
+    iot_door_enabled: bool = False
+    iot_door_device_id: str = "door-demo-01"
+    iot_door_hmac_secret: str = ""
+    iot_door_allowed_student_ids: str = ""
+    iot_door_min_hits: int = Field(default=3, ge=3, le=10)
+    iot_door_unlock_ms: int = Field(default=2000, ge=200, le=2000)
     attendance_threshold: float = 0.65
     attendance_margin: float = 0.05
     attendance_min_hits: int = Field(default=3, ge=1, le=20)
