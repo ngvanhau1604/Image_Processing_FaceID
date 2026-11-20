@@ -35,7 +35,8 @@ gửi JPEG; ảnh không được lưu bởi endpoint cửa.
 | Xác nhận ít nhất 3 khung khác nhau trong 8 giây, cooldown 5 giây | IMPLEMENTED |
 | Phản hồi JSON ký HMAC; log quyết định trước lệnh mở | IMPLEMENTED |
 | Unit tests logic protocol | TEST CODE ADDED, chưa có kết quả chạy |
-| Firmware ESP32 / GPIO / relay / khóa / TLS | PENDING, chưa flash và test |
+| Firmware mẫu ESP32-S3/OV3660 + HMAC/TLS (chưa build/flash) | SOURCE ADDED, NOT TESTED |
+| GPIO relay / wiring / dòng khóa / bench test | PENDING |
 | Liveness/PAD, audit trong nhiều worker, vận hành production | NOT IMPLEMENTED |
 
 Bản AttendAI cũ vẫn hiện diện và tài liệu ở docs/SYSTEM.md mô tả phân hệ kế
@@ -101,3 +102,9 @@ không thể dùng từ ESP32; cấu hình LAN + HTTPS chứng chỉ hợp lệ.
   https://nshopvn.com/product/khoa-chot-dien-tu-ly-03-12vdc-tiet-kiem-nang-luong/
 - Biến thể LY-03 có thông số khác nhau:
   https://lkcg.vn/khoa-chot-dien-tu-ly-03-12vdc
+
+## Firmware nhánh IoT
+
+Thư mục firmware/esp32_s3_cam chứa sketch PlatformIO dành cho board MB0184
+với chân camera theo hãng. GPIO relay và mức kích phải xác minh thủ công trước
+khi build; chưa đủ dữ liệu để gán GPIO mặc định. Đọc README trong thư mục firmware.
