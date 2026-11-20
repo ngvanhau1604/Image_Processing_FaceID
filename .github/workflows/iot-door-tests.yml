@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "iot_door/**"
+      - "firmware/esp32_s3_cam/**"
       - "backend/app/iot_door.py"
       - "backend/app/main.py"
       - "backend/app/config.py"
